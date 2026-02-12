@@ -1157,19 +1157,19 @@
                 for (let i = 0; i < days; i++) {
                     const wd = d.getDay(); // 0=日曜 … 6=土曜
 
-                    // ★月曜(1)と火曜(2)はスキップ
-                    if (wd !== 1 && wd !== 2) {
-                        const y = d.getFullYear();
-                        const m = pad(d.getMonth() + 1);
-                        const day = pad(d.getDate());
-                        const value = `${y}-${m}-${day}`;
-                        const label = `${y}/${m}/${day}（${JP_WD[wd]}）`;
+                    // ★全曜日表示に変更
+                    // if (wd !== 1 && wd !== 2) {
+                    const y = d.getFullYear();
+                    const m = pad(d.getMonth() + 1);
+                    const day = pad(d.getDate());
+                    const value = `${y}-${m}-${day}`;
+                    const label = `${y}/${m}/${day}（${JP_WD[wd]}）`;
 
-                        const opt = document.createElement('option');
-                        opt.value = value;
-                        opt.textContent = label;
-                        selectEl.appendChild(opt);
-                    }
+                    const opt = document.createElement('option');
+                    opt.value = value;
+                    opt.textContent = label;
+                    selectEl.appendChild(opt);
+                    // }
 
                     d.setDate(d.getDate() + 1);
                 }
@@ -1207,8 +1207,8 @@
             function buildHalfHourOptions(selectEl, weekday) {
                 selectEl.innerHTML = '<option value="" disabled selected>時間を選択</option>';
 
-                // 月曜・火曜は日付自体を出していないが、万一選ばれた場合は時間を出さない
-                if (weekday === 1 || weekday === 2) return;
+                // 月曜・火曜も時間を表示（制限解除）
+                // if (weekday === 1 || weekday === 2) return;
 
                 const { start, end } = WEEKLY_HOURS[weekday] || { start: 0, end: 23 };
 
@@ -1216,6 +1216,9 @@
                     for (const m of [0, 30]) {
                         // ★休憩帯はスキップ（選択肢に出さない）
                         if (isBlockedTime(weekday, h, m)) continue;
+
+                        // 20:30を除外
+                        if (h === 20 && m === 30) continue;
 
                         const hh = pad(h);
                         const mm = pad(m);
