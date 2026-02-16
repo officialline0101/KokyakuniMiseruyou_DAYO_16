@@ -642,6 +642,12 @@
             <button type="button" id="sanVisit" onclick="selectVisit(this)">答えたくない</button>
         </div>
 
+        <div class="label">ご来店回数<span class="required">必須</span></div>
+        <div class="visit-buttons">
+            <button type="button" id="newCustomer" onclick="selectCustomerType(this)">ご新規様</button>
+            <button type="button" id="repeatCustomer" onclick="selectCustomerType(this)">2回目以降</button>
+        </div>
+
         <div class="label">生年月日<span class="required">必須</span></div>
         <input type="text" id="seinengappi" placeholder="生年月日を入力してください" oninput="saveInput('seinengappi')">
 
@@ -991,6 +997,22 @@
                 updateDisplayInfo();
             }
 
+            let customerType = '';
+
+            function selectCustomerType(element) {
+                // 選択状態のリセットと設定
+                ['newCustomer', 'repeatCustomer'].forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) btn.classList.remove('active');
+                });
+                element.classList.add('active');
+                customerType = element.innerText.trim();
+
+                // 表示更新
+                saveInput('customerType'); // localStorage保存用（任意実装だが整合性のため）
+                updateDisplayInfo();
+            }
+
             // 置き換え版：そのままコピペでOK
             function formatDateTime(dateTimeString) {
                 if (!dateTimeString) return '無効な日時です';
@@ -1009,6 +1031,10 @@
             function updateDisplayInfo() {
                 const name = document.getElementById('name').value;
                 const visitCountText = visitCount ? `・<span style="color:#45c4b7;"><strong>性別</strong></span>：${visitCount}` : '・性別が未選択です';
+
+                // ご来店回数の表示
+                const customerTypeText = customerType ? `・<span style="color:#45c4b7;"><strong>ご来店回数</strong></span>：${customerType}` : '・ご来店回数が未選択です';
+
                 const selectedMenuText = selectedMenu ? `<span style="color:#45c4b7;"><strong>【コース】</strong></span><br>・${selectedMenu}` : '・コースが未選択です';
 
                 // メニューが選択されていたら、各メニューを改行して表示
@@ -1061,6 +1087,11 @@
         <div class="info-row">
             <p>${visitCountText}</p>
             <button class="edit-button" onclick="scrollToElement('firstVisit')">修正</button>
+        </div>
+        <hr>
+        <div class="info-row">
+            <p>${customerTypeText}</p>
+            <button class="edit-button" onclick="scrollToElement('newCustomer')">修正</button>
         </div>
         <hr>
         <div class="info-row">
@@ -1465,6 +1496,7 @@
                     phone: document.getElementById('phone').value.trim(),
                     seinengappi: document.getElementById('seinengappi').value.trim(),
                     visitCount: visitCount,
+                    customerType: customerType, // 追加
                     selectedMenu: selectedMenu,
                     selectedSymptom: selectedSymptom && selectedSymptom.length > 0 ? selectedSymptom.join('、') : null, // 複数選択を結合
                     irradiationsCount: irradiationsCount,
@@ -1492,6 +1524,11 @@
                     return;
                 }
 
+                if (!formData.customerType) {
+                    alert('ご来店回数を選択してください。');
+                    return;
+                }
+
                 if (!formData.seinengappi) {
                     alert('生年月日を入力してください。');
                     return;
@@ -1510,7 +1547,7 @@
                 // LINEトークにメッセージを送信
                 liff.sendMessages([{
                     type: 'text',
-                    text: `【予約フォーム】\n《お名前》${formData.name}\n《電話番号》${formData.phone}\n《性別》${formData.visitCount}\n《生年月日》${formData.seinengappi}\n\n《メニュー》\n・${formData.selectedSymptom.split('、').join('\n・')}\n\n【希望日時】\n《第一希望日》\n${formatDate(formData.dates[0])}\n\n《第二希望日》\n${formatDate(formData.dates[1])}\n\n《第三希望日》\n${formatDate(formData.dates[2])}\n\n《メッセージ》\n${formData.message}`
+                    text: `【予約フォーム】\n《お名前》${formData.name}\n《電話番号》${formData.phone}\n《性別》${formData.visitCount}\n《ご来店回数》${formData.customerType}\n《生年月日》${formData.seinengappi}\n\n《メニュー》\n・${formData.selectedSymptom.split('、').join('\n・')}\n\n【希望日時】\n《第一希望日》\n${formatDate(formData.dates[0])}\n\n《第二希望日》\n${formatDate(formData.dates[1])}\n\n《第三希望日》\n${formatDate(formData.dates[2])}\n\n《メッセージ》\n${formData.message}`
                 }]).then(() => {
                     /* メッセージ送信成功時の処理 */
                     alert('確認してご連絡差し上げます。');
