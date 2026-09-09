@@ -868,7 +868,7 @@
             <button type="button" onclick="showMenu('wax')">WAX脱毛</button>
             <button type="button" onclick="showMenu('shimi')">シミ取り【肝斑対応】</button>
             <button type="button" onclick="showMenu('hikari')">光脱毛</button>
-            <button type="button" onclick="showMenu('suiko')">【究極肌再生】エキスパート水光プレムアム＋ヘッドマッサージ</button>
+            <button type="button" onclick="showMenu('suiko')">【究極肌再生】<br>エキスパート水光プレムアム＋ヘッドマッサージ</button>
         </div>
 
         <div id="treatment-text" style="display: none; margin-bottom: 10px;"></div>
@@ -1457,7 +1457,7 @@
             // 選択されたメニューの名前を取得
             let selectedButton = document.querySelector(`.menu-sections button[onclick="showMenu('${menu}')"]`);
             if (selectedButton) {
-                selectedMenu = selectedButton.innerText;
+                selectedMenu = selectedButton.textContent;
             }
 
             // すべてのメニューボタンの選択状態をリセット
