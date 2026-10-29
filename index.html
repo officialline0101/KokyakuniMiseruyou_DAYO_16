@@ -317,6 +317,30 @@
         }
         .menu-sections button.hidden-by-concern { display: none; }
 
+        /* ① お悩みボタン：選択時は薄い緑＋緑枠（白文字にしない） */
+        .concern-buttons button.active {
+            background: rgba(0, 176, 139, 0.08);
+            color: #333;
+            border-color: #00b08b;
+            box-shadow: none;
+        }
+        /* ④ おすすめメニューカテゴリ（お悩み選択後）：初期値は薄緑＋緑枠、選択で緑＋白文字 */
+        #menu-area.concern-mode #main-menu-buttons button:not(.active) {
+            background: rgba(0, 176, 139, 0.08);
+            border-color: #00b08b;
+            color: #333;
+        }
+        /* ③ カテゴリの上の案内文（薄いグレー） */
+        .tap-guide {
+            display: block;
+            font-size: 12px;
+            font-weight: 400;
+            color: #b0b0b0;
+            text-align: center;
+            margin: 4px 0 8px 0;
+            letter-spacing: normal;
+        }
+
         /* ============================
            選び方（カテゴリ / お悩み）
            ============================ */
@@ -1012,7 +1036,8 @@
             </div>
         </div>
 
-        <div class="section-header" id="course">カテゴリをお選びください<span class="required">必須</span></div>
+        <div class="section-header" id="course"><span id="course-title">カテゴリをお選びください</span><span class="required">必須</span></div>
+        <span class="tap-guide" id="tap-guide">↓メニューカテゴリをタップ↓</span>
         <div class="menu-sections" id="main-menu-buttons">
             <button type="button" onclick="showMenu('release')">⚡️ 新感覚!!筋膜リリース</button>
             <button type="button" onclick="showMenu('removal')">✨ つるすべ美肌脱毛</button>
@@ -2510,16 +2535,22 @@
             // 開いていたメニューセクションを閉じる
             closeOpenMenuSections();
 
+            menuArea.classList.toggle('concern-mode', method === 'concern');
+            document.getElementById('course-title').textContent =
+                method === 'concern' ? 'おすすめメニューはこちら↓' : 'カテゴリをお選びください';
+
             if (method === 'category') {
                 concernArea.classList.remove('active');
                 mainButtons.forEach(b => b.classList.remove('hidden-by-concern'));
                 document.getElementById('course').style.display = '';
+                document.getElementById('tap-guide').style.display = '';
                 document.getElementById('main-menu-buttons').style.display = '';
                 requestAnimationFrame(() => scrollToSection('course', getHeaderOffset()));
             } else {
                 concernArea.classList.add('active');
                 // お悩み未選択の間は大元メニューを隠す
                 document.getElementById('course').style.display = 'none';
+                document.getElementById('tap-guide').style.display = 'none';
                 document.getElementById('main-menu-buttons').style.display = 'none';
                 requestAnimationFrame(() => scrollToSection('concern-area', getHeaderOffset()));
             }
@@ -2538,14 +2569,24 @@
                 b.classList.toggle('hidden-by-concern', !menuKeys.includes(key));
             });
             document.getElementById('course').style.display = '';
+                document.getElementById('tap-guide').style.display = '';
             document.getElementById('main-menu-buttons').style.display = '';
 
             if (menuKeys.length === 1) {
                 // 分岐先が1つだけなら自動で開く
                 showMenu(menuKeys[0]);
-            } else {
-                requestAnimationFrame(() => scrollToSection('course', getHeaderOffset()));
             }
+            // ⑤ おすすめメニューの見出しが画面の真ん中あたりに来るようにスクロール
+            requestAnimationFrame(() => scrollToSectionCenter('course'));
+        }
+
+        // 対象IDが画面の縦中央付近に来るようにスムーズスクロール
+        function scrollToSectionCenter(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            const y = rect.top + window.scrollY - (window.innerHeight / 2) + (rect.height / 2);
+            window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
         }
 
         function showMenu(menu) {
